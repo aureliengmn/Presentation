@@ -1,0 +1,65 @@
+Developping Data Products : Documentation of a Shiny App
+========================================================
+width: 1440
+height: 900
+transition: none
+font-family: 'Helvetica'
+css: my_style.css
+author: Aurelien Gmn
+date: `r format(Sys.Date(), format="%B %d, %Y")`
+
+Collecting inormations from the Box on the UI
+========================================================
+
+The UI part of the Shiny App is collecting three informations.
+  - the Area : it is the perimeter of the analysis.
+  - the two variables that we want to plot.
+
+For this presentation I have simulated the input$... by creating a list.
+```{r, }
+input <- list()
+input$Area_sel <- c(1:8)
+input$Variable1 <- "Oleic"
+input$Variable2 <- "Palmitic"
+```
+
+Subseting the dataset
+========================================================
+
+
+To make the plot We did a subset of the orginal dataset, taking only areas on the selection and keeping only 3 variables on the working table oli.
+
+```{r, }
+library(pgmm)
+data(olive)
+oli <- subset(olive, Area %in% input$Area_sel, c(input$Variable1, input$Variable2, "Area"))
+```
+- we do a selection of the variable that are importants
+- we put Area as a factor for the plot
+- we can lunch the ploting code.
+```{r, eval=FALSE}
+library(ggplot2)
+oli$Area <- as.factor(oli$Area)
+qplot(x=oli[,1], y=oli[,2], data=oli,colour=Area, xlab=input$Variable1, ylab=input$Variable2)
+```
+
+
+
+Plotting the variables
+========================================================
+
+```{r, echo = FALSE}
+library(ggplot2)
+oli$Area <- as.factor(oli$Area)
+qplot(x=oli[,1], y=oli[,2], data=oli,colour=Area, xlab=input$Variable1, ylab=input$Variable2)
+```
+
+Calculating the means for each Area
+========================================================
+
+```{r}
+    oli <- subset(olive, Area %in% input$Area_sel, c(input$Variable1, input$Variable2, "Area"))
+    m1 <- aggregate(oli[,1], by=list(oli$Area), mean)
+    m2 <- aggregate(oli[,2], by=list(oli$Area), mean)
+    print(setNames(cbind(m1, m2[,2]), c("Area",input$Variable1, input$Variable2)))
+```
